@@ -49,6 +49,9 @@ alwaysApply: true
 - **프레임워크**: FastAPI
 - **배포**: Uvicorn ASGI 서버
 - **컨테이너화**: Docker, Docker Compose
+- **CI/CD**: GitHub Actions
+- **테스트**: pytest, httpx
+- **코드 품질**: flake8, black, isort, bandit
 
 ## 제약사항
 - 서버 시간 기준으로 제공

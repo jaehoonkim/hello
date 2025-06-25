@@ -1,0 +1,15 @@
+# 기본 의존성
+-r requirements.txt
+
+# 테스트 의존성
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# 코드 품질
+flake8==6.1.0
+black==23.11.0
+isort==5.12.0
+
+# 보안 스캔
+bandit==1.7.5 

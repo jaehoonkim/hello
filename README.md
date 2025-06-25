@@ -132,12 +132,48 @@ GET /health
 
 ## 개발
 
+### 개발 환경 설정
+```bash
+# 개발 의존성 설치
+pip install -r requirements-dev.txt
+```
+
 ### 개발 모드로 실행
 ```bash
 uvicorn main:app --reload
 ```
 
-### 테스트
+### 테스트 실행
+```bash
+# 전체 테스트 실행
+pytest
+
+# 상세 테스트 실행
+pytest -v
+
+# 특정 테스트 실행
+pytest tests/test_main.py::TestTimeAPI::test_basic_time_endpoint
+```
+
+### 코드 품질 검사
+```bash
+# 린팅
+flake8 main.py
+
+# 코드 포맷팅 검사
+black --check main.py
+
+# 코드 포맷팅 적용
+black main.py
+
+# Import 정렬
+isort main.py
+
+# 보안 검사
+bandit -r main.py
+```
+
+### API 테스트
 ```bash
 # 기본 API 테스트
 curl http://localhost:8000/api/time
@@ -147,6 +183,22 @@ curl http://localhost:8000/api/time/iso
 curl http://localhost:8000/api/time/unix
 curl http://localhost:8000/api/time/korean
 ```
+
+## CI/CD
+
+GitHub Actions를 통한 자동화된 CI/CD 파이프라인:
+
+### CI 단계
+1. **테스트**: Python 3.8-3.11에서 pytest 실행
+2. **코드 품질**: flake8, black, isort 검사
+3. **보안 스캔**: Trivy 취약점 스캔
+4. **Docker 빌드**: 멀티 아키텍처 이미지 빌드
+5. **스모크 테스트**: 컨테이너 기본 동작 확인
+
+### CD 단계
+- main 브랜치 푸시 시 자동 배포
+- GitHub Container Registry에 이미지 푸시
+- 자동 태깅 및 버전 관리
 
 ## 기술 스택
 
