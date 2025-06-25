@@ -5,13 +5,17 @@ import json
 from datetime import datetime
 import time
 
-client = TestClient(app)
+# TestClient 초기화를 fixture로 변경
+@pytest.fixture
+def client():
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 class TestTimeAPI:
     """Time API 테스트 클래스"""
     
-    def test_root_endpoint(self):
+    def test_root_endpoint(self, client):
         """루트 엔드포인트 테스트"""
         response = client.get("/")
         assert response.status_code == 200
@@ -19,7 +23,7 @@ class TestTimeAPI:
         assert data["message"] == "Time API Service"
         assert data["version"] == "1.0.0"
     
-    def test_health_check(self):
+    def test_health_check(self, client):
         """헬스체크 엔드포인트 테스트"""
         response = client.get("/health")
         assert response.status_code == 200
@@ -28,7 +32,7 @@ class TestTimeAPI:
         assert "timestamp" in data
         assert isinstance(data["timestamp"], int)
     
-    def test_basic_time_endpoint(self):
+    def test_basic_time_endpoint(self, client):
         """기본 시간 API 테스트"""
         response = client.get("/api/time")
         assert response.status_code == 200
@@ -54,7 +58,7 @@ class TestTimeAPI:
         assert len(data["time"]) == 8
         assert data["time"].count(":") == 2
     
-    def test_iso_format_endpoint(self):
+    def test_iso_format_endpoint(self, client):
         """ISO 형식 시간 API 테스트"""
         response = client.get("/api/time/iso")
         assert response.status_code == 200
@@ -68,7 +72,7 @@ class TestTimeAPI:
         assert "T" in data["utc"]
         assert "T" in data["local"]
     
-    def test_unix_format_endpoint(self):
+    def test_unix_format_endpoint(self, client):
         """Unix timestamp 형식 시간 API 테스트"""
         response = client.get("/api/time/unix")
         assert response.status_code == 200
@@ -87,7 +91,7 @@ class TestTimeAPI:
         current_time = int(time.time())
         assert abs(data["timestamp"] - current_time) < 5
     
-    def test_korean_format_endpoint(self):
+    def test_korean_format_endpoint(self, client):
         """한국어 형식 시간 API 테스트"""
         response = client.get("/api/time/korean")
         assert response.status_code == 200
@@ -109,7 +113,7 @@ class TestTimeAPI:
         weekdays = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
         assert data["weekday"] in weekdays
     
-    def test_invalid_format_endpoint(self):
+    def test_invalid_format_endpoint(self, client):
         """잘못된 형식 요청 테스트"""
         response = client.get("/api/time/invalid")
         assert response.status_code == 400
@@ -117,7 +121,7 @@ class TestTimeAPI:
         assert "detail" in data
         assert "지원하지 않는 형식" in data["detail"]
     
-    def test_api_response_time(self):
+    def test_api_response_time(self, client):
         """API 응답 시간 테스트 (100ms 이하)"""
         import time
         
@@ -129,7 +133,7 @@ class TestTimeAPI:
         assert response.status_code == 200
         assert response_time < 100  # 100ms 이하
     
-    def test_concurrent_requests(self):
+    def test_concurrent_requests(self, client):
         """동시 요청 처리 테스트"""
         import concurrent.futures
         import threading
@@ -146,7 +150,7 @@ class TestTimeAPI:
         # 모든 요청이 성공해야 함
         assert all(results)
     
-    def test_cors_headers(self):
+    def test_cors_headers(self, client):
         """CORS 헤더 테스트"""
         response = client.get("/api/time", headers={"Origin": "http://localhost:3000"})
         # FastAPI의 CORS 미들웨어가 적절히 처리하는지 확인
@@ -157,7 +161,7 @@ class TestTimeAPI:
 class TestDataConsistency:
     """데이터 일관성 테스트"""
     
-    def test_timestamp_consistency(self):
+    def test_timestamp_consistency(self, client):
         """타임스탬프 일관성 테스트"""
         # 기본 API
         response1 = client.get("/api/time")
@@ -170,7 +174,7 @@ class TestDataConsistency:
         # 1초 이내 차이여야 함
         assert abs(data1["timestamp"] - data2["timestamp"]) <= 1
     
-    def test_time_progression(self):
+    def test_time_progression(self, client):
         """시간 진행 테스트"""
         response1 = client.get("/api/time")
         data1 = response1.json()
