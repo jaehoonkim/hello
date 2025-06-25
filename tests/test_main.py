@@ -8,8 +8,7 @@ import time
 # TestClient 초기화를 fixture로 변경
 @pytest.fixture
 def client():
-    with TestClient(app) as test_client:
-        yield test_client
+    return TestClient(app)
 
 
 class TestTimeAPI:
